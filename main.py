@@ -23,3 +23,4 @@ while True:
     else:
         print(f'There are {active_calls} active calls\n')
         print(df)
+

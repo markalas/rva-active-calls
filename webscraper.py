@@ -13,7 +13,7 @@ class WebScraper:
         content = response.content
         status = response.status_code
         return content, status
-     
+
     def parse_html(self):
         parser = 'html.parser'
         html_target_tag = 'table'
