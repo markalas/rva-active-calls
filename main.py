@@ -28,25 +28,3 @@ while True:
         # if df is not 0 then start comparison, hit the website again after 5 sec, store in dataframe then see if df = df_compare
         time.sleep(5)
         df_compare = webscraper_obj.dataframe_output()
-
-
-
-
-while True:
-    time.sleep(5)
-    print(f'\nData from {url}\n')
-    df = webscraper_obj.dataframe_output()
-    utility_obj.df_split_column(df=df, col_name='Call Status', new_col_name1='Status', new_col_name2='Status Time', delimiter='\s(?=\d)')
-    df.drop(['Call Status'],axis=1, inplace=True)
-    df.sort_values(by=['ID'], ascending=True)
-
-    active_calls = len(df)
-    
-    
-    if active_calls < 1:
-        print(f'No Active calls. Listening...')
-    else:
-        print(f'There are {active_calls} active calls\n')
-        print(df)
-
-
