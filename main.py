@@ -17,18 +17,16 @@ create dataframe obj
     print dataframe obj only if there is an update or added record
 """
 # lst1 = [{8988, 'ENROUTE 14:42'}, {8971, 'ARRIVED 14:17'}, {8946, 'ARV TRNSPT 14:53'}]
-# lst2 = [{8988, 'ENROUTE 14:42'}, {8971, 'ARRIVED 14:17'}, {8946, 'ARV TRNSPT 14:53'}]
+# lst2 = [{8988, 'ENROUTE 14:42'}, {8971, 'ARRIVED 14:17'}, {8946, 'ARV TRNSPT 14:54'}]
 
 # for i, j in zip(lst1, lst2):
 #     if i == j:
 #         print('match')
 #     else:
-#         print('no match', i, j)
+#         print('difference', i, j)
 
 
 # exit()
-
-
 
 df = pd.DataFrame()
 while True:
@@ -40,19 +38,35 @@ while True:
         # if df is not 0 then start comparison, hit the website again after 5 sec, store in dataframe then see if df = df_compare
         time.sleep(5)
         df_compare = webscraper_obj.dataframe_output()
+        df_updated = pd.DataFrame()
         if len(df) == len(df_compare):
             df_lst1 = []
             df_lst2 = []
-            for i in range(len(df)):
-                dict1 = {df.loc[i, "ID"], df.loc[i, "Call Status"]}
-                dict2 = {df_compare.loc[i, "ID"], df_compare.loc[i, "Call Status"]}
-                df_lst1.append(dict1)
-                df_lst2.append(dict2)
+            # Store ID and status from both dataframes
+            for i in df.index:
+                dict1 = {"Idx": i, 
+                        "Call Status": df.loc[i, "Call Status"]}
+                dict2 = {"Idx": i,
+                        "Call Status": df_compare.loc[i, "Call Status"]}
+                
+                df_lst1.append(dict1), df_lst2.append(dict2)
             
+            # Find differences in the dataframe by comparing them in a list
             for i, j in zip(df_lst1, df_lst2):
                 if i == j:
-                    print("No Status Update")
+                    # do nothing
+                    pass 
                 else:
-                    print('Status Update')
+                    updated_status_val = j['Call Status']
+                    status_indicator = 'Updated Status'
+                    idx = j['Idx']
+                    df.at[idx, 'Call Status'] = updated_status_val
+                    df.at[idx, 'Call Status Indicator'] = status_indicator
+                    df_updated = df
+                    previous_status_val = df_updated['Previous Call Status'].iloc[idx]
+                    print(df_updated)
 
 
+
+
+            

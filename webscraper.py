@@ -1,6 +1,7 @@
-from io import StringIO
 import requests
 import pandas as pd
+from pandas import DataFrame
+from io import StringIO
 from bs4 import BeautifulSoup
 
 class WebScraper:
@@ -33,12 +34,15 @@ class WebScraper:
         html_io = StringIO(html_str)
         return html_io
     
-    def dataframe_output(self):
+    def dataframe_output(self) -> DataFrame:
         html_str = self.html_to_io()
 
         try:
             self.df = pd.read_html(html_str)
-            return self.df[0]
+            self.df = self.df[0]
+            self.df['Previous Call Status'] = ""
+            self.df['Call Status Indicator'] = ""
+            return self.df
         except ValueError as ex:
             print(f'Error in Webscraper.dataframe_output : ValueError : {ex}')
         return None
