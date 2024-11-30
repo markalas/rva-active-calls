@@ -10,23 +10,27 @@ class WebScraper:
         self.url = url
 
     def request_url(self):
-        response = requests.get(self.url)
-        content = response.content
-        status = response.status_code
-        return content, status
+        try:
+            response = requests.get(self.url)
+            content = response.content
+            status = response.status_code
+            return content, status
+        except Exception as ex:
+            print(f'Exception in WebScraper.request_url ::: Unable to get {self.url} status is {status} ::: Exception ::: {ex}')
+        return None
 
     def parse_html(self):
         parser = 'html.parser'
         html_target_tag = 'table'
-        content, status = self.request_url()
 
         try:
+            content, status = self.request_url()
             if status == 200:
                 html_content = BeautifulSoup(content, parser)
                 html_target = html_content.find_all(html_target_tag)
                 return html_target
         except Exception as ex:
-            print(f'Exception in WebScraper.parse_html : Exception : {ex}')
+            print(f'Exception in WebScraper.parse_html ::: Unable to find {html_target} ::: Exception ::: {ex}')
         return None
         
     def html_to_io(self):
@@ -44,7 +48,7 @@ class WebScraper:
             self.df['Call Status Indicator'] = ""
             return self.df
         except ValueError as ex:
-            print(f'Error in Webscraper.dataframe_output : ValueError : {ex}')
+            print(f'Error in Webscraper.dataframe_output ::: ValueError ::: {ex}')
         return None
             
 
