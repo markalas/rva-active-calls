@@ -55,7 +55,7 @@ while True:
 
             # Find differences in the dataframe by comparing them in a list
             for i, j in zip(df_lst1, df_lst2):
-                if i == j:
+                if i == j: 
                     # do nothing
                     pass
                 else: # throw this into a method
@@ -63,7 +63,7 @@ while True:
                     status_indicator = f'Updated Status @ {datetime}' # indicator for an updated call status
                     df_previous_status_val = i['Call Status']
                     df_compare_updated_status_val = j['Call Status'] # updated status from df2
-                    update_idx = i['Idx'] # index location in dataframe 1
+                    update_idx = j['Idx'] # index location in dataframe 1
 
                     df.at[update_idx, 'Call Status'] = df_compare_updated_status_val # updating call status in df to updated value
                     df.at[update_idx, 'Call Status Indicator'] = status_indicator # updating status indicator in df
@@ -81,7 +81,7 @@ while True:
         else:
             if len(df) > len(df_compare):
                 print('updated df: rows removed')
-                df = df_compare
+                # fix this
             elif len(df) < len(df_compare):
                 print('updated df: rows added')
                 df = pd.concat([df_compare], verify_integrity=True, ignore_index=True)

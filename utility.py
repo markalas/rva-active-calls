@@ -8,5 +8,5 @@ class Utility:
         df[[new_col_name1, new_col_name2]] = df[col_name].str.split(delimiter, expand=True)
         return df
     
-    def update_df(self):
+    def df_sort_procedure(self):
         pass
