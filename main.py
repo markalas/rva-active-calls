@@ -1,5 +1,7 @@
+from numpy import isin
 from webscraper import WebScraper
 from utility import Utility
+import numpy as np
 import time
 import pandas as pd
 import itertools
@@ -7,7 +9,7 @@ import datetime as dt
 
 url = "https://activecalls.henrico.gov"
 webscraper_obj = WebScraper(url)
-utility_obj = Utility
+utility_obj = Utility()
 
 """
 create dataframe obj
@@ -29,59 +31,81 @@ create dataframe obj
 
 # exit()
 
+# define method for comparison which takes dataframes as arguments
+
 df = pd.DataFrame()
 while True:
     if len(df) == 0:
         df_init = webscraper_obj.dataframe_output()
+        # df_init = utility_obj.excel_to_df('active_calls_2024-12-03_012529.xlsx')
         df = df_init
-        print(f'{df}\n')
+        print(f'\n{df}\n')
     else:
         # if df is not 0 then start comparison, hit the website again after 5 sec, store in dataframe then see if df = df_compare
-        time.sleep(30)
+        time.sleep(5)
         df_compare = webscraper_obj.dataframe_output()
-        df_updated = pd.DataFrame()
-        print(df)
-        if len(df) == len(df_compare):
-            df_lst1 = []
-            df_lst2 = []
-            # Store ID and status from both dataframes
-            for i in df.index:
-                dict1 = {"Idx": i,
-                        "Call Status": df.loc[i, "Call Status"]}
-                dict2 = {"Idx": i,
-                        "Call Status": df_compare.loc[i, "Call Status"]}
+        datetime = dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        # df_compare = utility_obj.excel_to_df('active_calls_2024-12-03_012535.xlsx')
+        df_start_lst = [{'ID': row['ID'], 'Call Status': row['Call Status']} for _, row in df.iterrows()]
+        df_compare_lst = [{'ID': row['ID'], 'Call Status': row['Call Status']} for _, row in df_compare.iterrows()]
 
-                df_lst1.append(dict1), df_lst2.append(dict2)
+        # print(df_init)
+        # print(df_start_lst, df_compare_lst)
 
-            # Find differences in the dataframe by comparing them in a list
-            for i, j in zip(df_lst1, df_lst2):
-                if i == j: 
-                    # do nothing
-                    pass
-                else: # throw this into a method
-                    datetime = dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                    status_indicator = f'Updated Status @ {datetime}' # indicator for an updated call status
-                    df_previous_status_val = i['Call Status']
-                    df_compare_updated_status_val = j['Call Status'] # updated status from df2
-                    update_idx = j['Idx'] # index location in dataframe 1
+        if len(df_start_lst) > len(df_compare_lst):
+            print('rows removed')
+            lst_diff = [val for val in df_start_lst if val not in df_compare_lst]
+            lst_init = [val for val in df_start_lst]
 
-                    df.at[update_idx, 'Call Status'] = df_compare_updated_status_val # updating call status in df to updated value
-                    df.at[update_idx, 'Call Status Indicator'] = status_indicator # updating status indicator in df
-                    df_updated = df # store df to df_updated
-                    df_updated_previous_status_val = df_updated['Previous Call Status'].iloc[update_idx]
+            for item_diff in lst_diff:
+                diff_id = int(item_diff['ID'])
+                diff_id_idx = df[df['ID'] == diff_id].index
+                print(f'removing record: {diff_id}')
+                df.drop(diff_id_idx, inplace=True)
+                print(df)
 
-                    if df_updated['Previous Call Status'].iloc[update_idx] == "":
-                        df_updated.at[update_idx, 'Previous Call Status'] = df_previous_status_val
+        elif len(df_start_lst) < len(df_compare_lst):
+            # first check if any of the previous records had an update
+            # add new rows after
+            print('rows added')
+            lst_diff = [val for val in df_compare_lst if val not in df_start_lst]
+            lst_init = [val for val in df_start_lst]
+
+            for item_diff in lst_diff:
+                diff_id = int(item_diff['ID'])
+                new_status = item_diff['Call Status']
+                is_empty_df = df.loc[df['ID'] == diff_id].empty
+
+                if is_empty_df:
+                    print(f'adding record: {diff_id}')
+                    new_record_df = df_compare.loc[df_compare['ID']==diff_id]
+                    df = pd.concat([df, new_record_df], ignore_index=True)
+                    print(df)
+                else:
+                    previous_status = df.loc[df['ID'] == diff_id, 'Call Status'].values[0]
+                    if previous_status != new_status:
+                        print(f'updating record: {diff_id}')
+                        df.loc[df['ID'] == diff_id, 'Previous Call Status'] = df.loc[df['ID'] == diff_id, 'Call Status']
+                        df.loc[df['ID'] == diff_id, 'Call Status'] = new_status
+                        df.loc[df['ID'] == diff_id, 'Call Status Indicator'] = datetime
+                        print(df)
                     else:
-                        df_updated.at[update_idx, 'Previous Call Status'] = df_updated_previous_status_val
-
-                    df = df_updated
-
-                    print(f'{df}\n')
+                        pass
         else:
-            if len(df) > len(df_compare):
-                print('updated df: rows removed')
-                # fix this
-            elif len(df) < len(df_compare):
-                print('updated df: rows added')
-                df = pd.concat([df_compare], verify_integrity=True, ignore_index=True)
+            # print('updating statuses')
+            lst_diff = [val for val in df_compare_lst]
+            lst_init = [val for val in df_start_lst]
+
+            for item_diff in lst_diff:
+                diff_id = int(item_diff['ID'])
+                new_status = item_diff['Call Status']
+                previous_status = df.loc[df['ID'] == diff_id, 'Call Status'].values[0]
+
+                if previous_status != new_status:
+                    print(f'updating record: {diff_id}')
+                    df.loc[df['ID'] == diff_id, 'Previous Call Status'] = df.loc[df['ID'] == diff_id, 'Call Status']
+                    df.loc[df['ID'] == diff_id, 'Call Status'] = new_status
+                    df.loc[df['ID'] == diff_id, 'Call Status Indicator'] = datetime
+                    print(df)
+                else:
+                    pass

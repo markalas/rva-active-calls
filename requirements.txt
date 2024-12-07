@@ -3,3 +3,5 @@ xmltodict
 pandas
 beautifulsoup4
 pydrive
+openpyxl
+xlsxwriter
