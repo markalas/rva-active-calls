@@ -13,8 +13,18 @@ class Utility:
         self.datetime = dt.datetime.today().strftime('%Y-%m-%d_%I%M%S')
         self.filename_xlsx = f'active_calls_{self.datetime}.xlsx'
 
+        # folders
+        self.folders = ['DATA',
+                        'LOGS',
+                        'COORDINATES']
+
+        # create folders
+
         # instantiate logger class
         self.log_handler_obj = LogHandler(self.datetime)
+    
+    def create_folders(self):
+        pass
 
     @property
     def log_handler(self):
