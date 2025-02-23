@@ -13,24 +13,17 @@ class Utility:
         self.datetime = dt.datetime.today().strftime('%Y-%m-%d_%I%M%S')
         self.filename_xlsx = f'active_calls_{self.datetime}.xlsx'
 
-        # folders
-        self.folders = ['DATA',
-                        'LOGS',
-                        'COORDINATES']
-
-        # create folders
-
         # instantiate logger class
         self.log_handler_obj = LogHandler(self.datetime)
     
     def create_folders(self):
+        folders = ['DATA', 'LOGS','COORDINATES']
         pass
 
-    @property
     def log_handler(self):
         return self.log_handler_obj
 
-    def df_split_column(df: DataFrame, col_name, new_col_name1, new_col_name2, delimiter) -> DataFrame:
+    def df_split_column(df: pd.DataFrame, col_name, new_col_name1, new_col_name2, delimiter) -> pd.DataFrame:
         df[[new_col_name1, new_col_name2]] = df[col_name].str.split(delimiter, expand=True)
         return df
     
@@ -44,3 +37,7 @@ class Utility:
     def excel_to_df(self, filename: str) -> DataFrame:
         df = pd.read_excel(filename)
         return df
+
+    def value_exists(self, df: pd.DataFrame, id):
+        is_exist = df.loc[df['ID'] == id].any().any()
+        return is_exist

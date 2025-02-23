@@ -9,7 +9,7 @@ class WebScraper:
     def __init__(self, url, utility_obj):
         self.url = url
         self.utility_obj = utility_obj
-        self.logger = utility_obj.log_handler
+        self.logger = utility_obj.log_handler()
 
     def request_url(self):
         try:
